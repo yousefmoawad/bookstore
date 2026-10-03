@@ -1,0 +1,71 @@
+﻿
+@model dynamic
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container-fluid py-4">
+    <h1 class="mb-4">Admin Dashboard</h1>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Products</h5>
+                    <h2>@Model.TotalProducts</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Pending Products</h5>
+                    <h2>@Model.PendingProducts</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Active Products</h5>
+                    <h2>@Model.ActiveProducts</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">In Shop</h5>
+                    <h2>@Model.ActiveProducts</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card">
+        <div class="card-header">
+            <h5>Quick Actions</h5>
+        </div>
+        <div class="card-body">
+            <div class="d-flex flex-wrap gap-2">
+                <a asp-action="AddProduct" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add New Product
+                </a>
+                <a asp-action="Products" class="btn btn-success">
+                    <i class="fas fa-boxes"></i> Manage All Products
+                </a>
+                @if (Model.PendingProducts > 0)
+                {
+                    <a asp-action="Products" class="btn btn-warning">
+                        <i class="fas fa-clock"></i> Pending Approval (@Model.PendingProducts)
+                    </a>
+                }
+                <a asp-controller="Shop" asp-action="Index" class="btn btn-info" target="_blank">
+                    <i class="fas fa-store"></i> View Shop
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

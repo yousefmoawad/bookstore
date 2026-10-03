@@ -1,0 +1,127 @@
+﻿@model IEnumerable<BookStore.Models.Entities.Product>
+@{
+    ViewData["Title"] = "Shop - Browse Books";
+}
+
+<div class="container py-5">
+    <h1 class="mb-4">Browse Our Books Collection</h1>
+
+    <!-- Search and Filter Section -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <form method="get" class="d-flex">
+                <input type="text" name="search" class="form-control me-2" placeholder="Search books..." value="@ViewBag.Search">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </form>
+        </div>
+        <div class="col-md-4">
+            <select class="form-select" id="sortBy">
+                <option value="name">Sort by Name</option>
+                <option value="price_low">Price: Low to High</option>
+                <option value="price_high">Price: High to Low</option>
+                <option value="newest">Newest First</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Products Grid -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="row">
+            @foreach (var product in Model)
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-img-top text-center py-4" style="font-size: 5rem; color: #667eea;">
+                            @product.Icon
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">@product.Title</h5>
+                            <p class="card-text text-muted">by @product.Author</p>
+                            <p class="card-text small">@(product.Description?.Length > 100 ? product.Description.Substring(0, 100) + "..." : product.Description)</p>
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="text-primary mb-0">$@product.Price.ToString("0.00")</h5>
+                                    <span class="badge bg-info">@product.Category?.Name</span>
+                                </div>
+                                <div class="d-grid gap-2">
+                                    <a asp-action="Details" asp-route-id="@product.Id" class="btn btn-primary">
+                                        <i class="fas fa-info-circle"></i> View Details
+                                    </a>
+                                    <button class="btn btn-outline-success add-to-cart-btn" data-product-id="@product.Id">
+                                        <i class="fas fa-cart-plus"></i> Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <div style="font-size: 6rem; color: #ddd;">📚</div>
+            <h3 class="mt-3">No Books Available</h3>
+            <p class="text-muted">We're adding new books to our collection. Please check back later.</p>
+            <a href="/" class="btn btn-primary mt-3">
+                <i class="fas fa-home"></i> Back to Home
+            </a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Sort functionality
+            $('#sortBy').change(function() {
+                // Implement sorting logic here
+                alert('Sorting by: ' + $(this).val());
+            });
+
+            // Add to cart functionality
+            $('.add-to-cart-btn').click(function() {
+                var productId = $(this).data('product-id');
+                var productName = $(this).closest('.card').find('.card-title').text();
+
+                $.post('/Cart/AddToCart', {
+                    productId: productId,
+                    quantity: 1,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                })
+                .done(function(response) {
+                    if (response.success) {
+                        // Update cart count
+                        $('#cartCount').text(response.cartCount);
+
+                        // Show success message
+                        showNotification('"' + productName + '" added to cart!', 'success');
+                    } else {
+                        showNotification(response.message || 'Error adding to cart', 'danger');
+                    }
+                })
+                .fail(function() {
+                    showNotification('Error adding to cart. Please try again.', 'danger');
+                });
+            });
+
+            function showNotification(message, type) {
+                // Create notification element
+                var notification = $('<div class="alert alert-' + type + ' alert-dismissible fade show position-fixed" style="top: 100px; right: 20px; z-index: 9999;"></div>')
+                    .text(message)
+                    .append('<button type="button" class="btn-close" data-bs-dismiss="alert"></button>');
+
+                $('body').append(notification);
+
+                // Auto remove after 3 seconds
+                setTimeout(function() {
+                    notification.alert('close');
+                }, 3000);
+            }
+        });
+    </script>
+}

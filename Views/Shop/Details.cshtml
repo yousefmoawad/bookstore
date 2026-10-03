@@ -1,0 +1,78 @@
+﻿@model BookStore.Models.Entities.Product
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="container py-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/Shop">Shop</a></li>
+            <li class="breadcrumb-item active">@Model.Title</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-5">
+            <div class="text-center mb-4" style="font-size: 8rem; color: #667eea;">
+                @Model.Icon
+            </div>
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <img src="@Model.ImageUrl" class="img-fluid rounded shadow" alt="@Model.Title">
+            }
+        </div>
+
+        <div class="col-md-7">
+            <h1 class="fw-bold">@Model.Title</h1>
+            <p class="lead">by @Model.Author</p>
+
+            <div class="mb-4">
+                <span class="badge bg-primary fs-5 p-3">$@Model.Price.ToString("0.00")</span>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Description</h5>
+                    <p class="card-text">@Model.Description</p>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2 col-md-6">
+                <button class="btn btn-primary btn-lg" id="addToCartBtn" data-product-id="@Model.Id">
+                    <i class="fas fa-cart-plus"></i> Add to Cart
+                </button>
+                <a href="/Shop" class="btn btn-outline-secondary btn-lg">
+                    <i class="fas fa-arrow-left"></i> Back to Shop
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#addToCartBtn').click(function() {
+                var productId = $(this).data('product-id');
+                var productName = "@Model.Title";
+
+                $.post('/Cart/AddToCart', {
+                    productId: productId,
+                    quantity: 1,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                })
+                .done(function(response) {
+                    if (response.success) {
+                        alert('"' + productName + '" added to cart!');
+                    } else {
+                        alert(response.message || 'Error adding to cart');
+                    }
+                })
+                .fail(function() {
+                    alert('Error adding to cart. Please try again.');
+                });
+            });
+        });
+    </script>
+}

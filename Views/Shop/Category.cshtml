@@ -1,0 +1,43 @@
+﻿@model BookStore.Models.Entities.Category
+@{
+    ViewData["Title"] = Model.Name + " Books";
+}
+
+<div class="container py-5">
+    <h1 class="mb-4">@Model.Name Books</h1>
+    <p class="lead mb-4">@Model.Description</p>
+
+    @if (Model.Products != null && Model.Products.Any())
+    {
+        <div class="row">
+            @foreach (var product in Model.Products.Where(p => p.Status == "Active"))
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-img-top text-center py-4" style="font-size: 4rem; color: #667eea;">
+                            @product.Icon
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">@product.Title</h5>
+                            <p class="card-text text-muted">by @product.Author</p>
+                            <h5 class="text-primary">$@product.Price.ToString("0.00")</h5>
+                            <a asp-action="Details" asp-route-id="@product.Id" class="btn btn-primary w-100">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            No books available in this category yet.
+        </div>
+    }
+
+    <a href="/Shop" class="btn btn-outline-primary">
+        <i class="fas fa-arrow-left"></i> Back to All Books
+    </a>
+</div>

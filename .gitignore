@@ -1,0 +1,22 @@
+## Visual Studio
+.vs/
+*.user
+*.suo
+
+## Build outputs
+bin/
+obj/
+
+## Local configuration and secrets
+appsettings*.json
+*.local.json
+Properties/serviceDependencies*.json
+
+## User-uploaded files
+wwwroot/uploads/**
+!wwwroot/uploads/.gitkeep
+
+## IDE and OS files
+.vscode/
+.DS_Store
+Thumbs.db

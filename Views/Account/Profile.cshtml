@@ -1,0 +1,83 @@
+﻿@model BookStore.Controllers.ProfileViewModel
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<div class="container py-5">
+    <h2 class="mb-4">My Profile</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="row">
+        <!-- الصورة -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+                    {
+                        <img src="@Model.AvatarUrl"
+                             class="rounded-circle mb-3"
+                             style="width: 150px; height: 150px; object-fit: cover;">
+                    }
+                    else
+                    {
+                        <div class="rounded-circle bg-secondary mb-3 d-flex align-items-center justify-content-center mx-auto"
+                             style="width: 150px; height: 150px;">
+                            <i class="fas fa-user fa-4x text-white"></i>
+                        </div>
+                    }
+
+                    <!-- زر Change Password هنا -->
+                    <a href="#"
+                       onclick="alert('Change Password feature is temporarily disabled')"
+                       class="btn btn-outline-primary w-100">
+                        <i class="fas fa-key me-2"></i>Change Password
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- معلومات المستخدم -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Profile Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-action="EditProfile" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" value="@Model.Email" readonly>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">First Name</label>
+                                <input type="text" class="form-control" name="FirstName" value="@Model.FirstName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Last Name</label>
+                                <input type="text" class="form-control" name="LastName" value="@Model.LastName" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" name="PhoneNumber" value="@Model.PhoneNumber">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Update Profile</button>
+                        <a href="/" class="btn btn-outline-secondary">Back to Home</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

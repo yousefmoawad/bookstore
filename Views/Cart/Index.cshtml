@@ -1,0 +1,195 @@
+﻿@model BookStore.Models.ViewModels.CartViewModel
+@{
+    ViewData["Title"] = "Shopping Cart";
+}
+
+<div class="container py-5">
+    <h1 class="mb-4">Shopping Cart</h1>
+
+    <!-- رسالة النجاح الكبيرة لو Cart فاضي بعد الدفع -->
+    @if (!Model.Items.Any() && TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <div class="d-flex align-items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle fa-2x me-3"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h4 class="alert-heading mb-2">@TempData["SuccessMessage"]</h4>
+                    <p class="mb-0">Your cart is now empty. All items have been processed in your order.</p>
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (Model.Items.Any())
+    {
+        <div class="row">
+            <!-- قائمة المنتجات -->
+            <div class="col-lg-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h4 class="mb-0">Your Items (@Model.ItemCount)</h4>
+                    </div>
+                    <div class="card-body p-0">
+                        @foreach (var item in Model.Items)
+                        {
+                            <div class="cart-item p-3 border-bottom d-flex align-items-center">
+                                <!-- صورة المنتج -->
+                                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                {
+                                    <div class="flex-shrink-0 me-3">
+                                        <img src="@item.ImageUrl" alt="@item.Title"
+                                             class="img-thumbnail" style="width: 80px; height: 100px; object-fit: cover;">
+                                    </div>
+                                }
+
+                                <!-- تفاصيل المنتج -->
+                                <div class="flex-grow-1">
+                                    <h5 class="mb-1">@item.Title</h5>
+                                    <p class="text-muted mb-1">By @item.Author</p>
+                                    <p class="fw-bold mb-2">$@item.Price.ToString("0.00") each</p>
+
+                                    <!-- التحكم في الكمية -->
+                                    <div class="d-flex align-items-center">
+                                        <form method="post" asp-action="UpdateQuantity" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="productId" value="@item.ProductId" />
+                                            <div class="input-group" style="width: 140px;">
+                                                <button type="submit" name="quantity" value="@(item.Quantity - 1)"
+                                                        class="btn btn-outline-secondary" @(item.Quantity <= 1 ? "disabled" : "")>
+                                                    <i class="fas fa-minus"></i>
+                                                </button>
+                                                <input type="text" class="form-control text-center"
+                                                       value="@item.Quantity" readonly style="background-color: white;">
+                                                <button type="submit" name="quantity" value="@(item.Quantity + 1)"
+                                                        class="btn btn-outline-secondary" @(item.Quantity >= item.StockQuantity ? "disabled" : "")>
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                            </div>
+                                        </form>
+
+                                        <!-- زر الحذف -->
+                                        <form method="post" asp-action="RemoveItem" class="ms-3 d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="productId" value="@item.ProductId" />
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash"></i> Remove
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                    <!-- المخزون -->
+                                    @if (item.StockQuantity < 10)
+                                    {
+                                        <div class="mt-2">
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                                Only @item.StockQuantity left in stock
+                                            </span>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- السعر الإجمالي -->
+                                <div class="flex-shrink-0 text-end">
+                                    <h5 class="text-primary">$@((item.Price * item.Quantity).ToString("0.00"))</h5>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- زر مسح الكل -->
+                    @if (Model.Items.Any())
+                    {
+                        <div class="card-footer bg-light">
+                            <form method="post" asp-action="Clear">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-outline-danger">
+                                    <i class="fas fa-trash-alt me-2"></i> Clear All Items
+                                </button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- ملخص الطلب -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h4 class="mb-0">Order Summary</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal (@Model.ItemCount items):</span>
+                            <span class="fw-bold">$@Model.Subtotal.ToString("0.00")</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Shipping Fee:</span>
+                            <span>$@Model.ShippingFee.ToString("0.00")</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="h5">Total:</span>
+                            <span class="h5 text-primary">$@Model.Total.ToString("0.00")</span>
+                        </div>
+
+                        <!-- زر Checkout -->
+                        <a asp-action="Checkout" class="btn btn-success btn-lg w-100 mb-3">
+                            <i class="fas fa-lock me-2"></i> Proceed to Checkout
+                        </a>
+
+                        <!-- استمرار التسوق -->
+                        <a href="/Shop" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-shopping-bag me-2"></i> Continue Shopping
+                        </a>
+                    </div>
+                </div>
+
+                <!-- رسالة تأمين -->
+                <div class="card shadow-sm mt-4">
+                    <div class="card-body text-center">
+                        <i class="fas fa-shield-alt fa-2x text-success mb-3"></i>
+                        <h6>Secure Checkout</h6>
+                        <p class="small text-muted mb-0">
+                            Your payment information is encrypted and secure.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- صفحة Cart فاضي -->
+        <div class="text-center py-5">
+            <div class="display-1 text-muted mb-4">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success mb-4" style="max-width: 600px; margin: 0 auto;">
+                    <h4 class="alert-heading">🎉 Order Successful!</h4>
+                    <p>@TempData["SuccessMessage"]</p>
+                    <hr>
+                    <p class="mb-0">You can continue shopping or view your orders.</p>
+                </div>
+            }
+
+            <h2>Your cart is empty</h2>
+            <p class="lead mb-4">Start adding some amazing books to your cart!</p>
+
+            <div class="d-flex justify-content-center gap-3">
+                <a href="/Shop" class="btn btn-primary btn-lg">
+                    <i class="fas fa-book me-2"></i> Browse Books
+                </a>
+                <a href="/" class="btn btn-outline-secondary btn-lg">
+                    <i class="fas fa-home me-2"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,116 @@
+﻿@model BookStore.Models.ViewModels.HomeViewModel
+
+@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="container py-5">
+    <!-- Hero Section -->
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6">
+            <h1 class="display-4 fw-bold mb-3">Welcome to Book Store</h1>
+            <p class="lead mb-4">Discover amazing books and enjoy great reading experiences.</p>
+            <a href="/Shop" class="btn btn-primary btn-lg">Browse Books</a>
+        </div>
+        <div class="col-md-6 text-center">
+            <div style="font-size: 8rem; color: #667eea;">📚</div>
+        </div>
+    </div>
+
+    <!-- Featured Books -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="fw-bold mb-4">Featured Books</h2>
+        </div>
+
+        @if (Model.FeaturedProducts.Any())
+        {
+            @foreach (var product in Model.FeaturedProducts)
+            {
+                <div class="col-md-3 col-sm-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <div style="font-size: 4rem; color: #667eea; margin-bottom: 1rem;">
+                                @product.Icon
+                            </div>
+                            <h5 class="card-title">@product.Title</h5>
+                            <p class="card-text text-muted">by @product.Author</p>
+                            <p class="card-text fw-bold text-primary">$@product.Price.ToString("0.00")</p>
+                            <button class="btn btn-outline-primary w-100 add-to-cart-btn"
+                                    data-product-id="@product.Id">
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-info">
+                    No featured products available.
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- New Arrivals -->
+    <div class="row">
+        <div class="col-12">
+            <h2 class="fw-bold mb-4">New Arrivals</h2>
+        </div>
+
+        @if (Model.NewArrivals.Any())
+        {
+            @foreach (var product in Model.NewArrivals.Take(4))
+            {
+                <div class="col-md-3 col-sm-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <div style="font-size: 4rem; color: #667eea; margin-bottom: 1rem;">
+                                @product.Icon
+                            </div>
+                            <h5 class="card-title">@product.Title</h5>
+                            <p class="card-text text-muted">by @product.Author</p>
+                            <p class="card-text fw-bold text-primary">$@product.Price.ToString("0.00")</p>
+                            <button class="btn btn-outline-primary w-100 add-to-cart-btn"
+                                    data-product-id="@product.Id">
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('.add-to-cart-btn').click(function() {
+                var productId = $(this).data('product-id');
+                var productName = $(this).siblings('.card-title').text();
+
+                $.post('/Cart/AddToCart', {
+                    productId: productId,
+                    quantity: 1,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                })
+                .done(function(response) {
+                    if (response.success) {
+                        alert('Product added to cart!');
+                        // Update cart count
+                        $('.cart-count').text(response.cartCount);
+                    } else {
+                        alert(response.message || 'Error adding to cart');
+                    }
+                })
+                .fail(function() {
+                    alert('Error adding to cart');
+                });
+            });
+        });
+    </script>
+}
